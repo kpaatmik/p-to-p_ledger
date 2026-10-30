@@ -1,0 +1,23 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------< com.paymentledger:payment-ledger >------------------
+[INFO] Building P2P Payment Ledger 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ payment-ledger ---
+[INFO] Deleting D:\Payment ledger\backend\target
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ payment-ledger ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ payment-ledger ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 3 source files with javac [debug parameters release 25] to target\classes
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.299 s
+[INFO] Finished at: 2026-10-29T21:43:13+05:30
+[INFO] ------------------------------------------------------------------------

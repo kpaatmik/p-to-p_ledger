@@ -1,0 +1,80 @@
+package com.paymentledger.exception;
+
+import com.paymentledger.dto.response.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.List;
+
+/**
+ * Centralised exception handler. Translates exceptions to consistent
+ * ErrorResponse JSON for all controllers.
+ */
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    /** Jakarta Bean Validation failures on @Valid request bodies. */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(
+            MethodArgumentNotValidException ex, HttpServletRequest req) {
+        ErrorResponse body = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Validation Failed",
+                "One or more fields failed validation",
+                req.getRequestURI());
+        List<ErrorResponse.FieldError> fieldErrors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(fe -> new ErrorResponse.FieldError(
+                        fe.getField(),
+                        fe.getRejectedValue() == null ? null : fe.getRejectedValue().toString(),
+                        fe.getDefaultMessage()))
+                .toList();
+        body.setFieldErrors(fieldErrors);
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    /** Constraint violations on @Validated method parameters. */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+            ConstraintViolationException ex, HttpServletRequest req) {
+        ErrorResponse body = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Constraint Violation",
+                ex.getMessage(),
+                req.getRequestURI());
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    /** Spring Security — unauthenticated access. */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthentication(
+            AuthenticationException ex, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                new ErrorResponse(401, "Unauthorized", ex.getMessage(), req.getRequestURI()));
+    }
+
+    /** Spring Security — authorised user lacking required role. */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(
+            AccessDeniedException ex, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                new ErrorResponse(403, "Forbidden", ex.getMessage(), req.getRequestURI()));
+    }
+
+    /** Catch-all for unhandled runtime exceptions. */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGeneric(
+            Exception ex, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                new ErrorResponse(500, "Internal Server Error",
+                        "An unexpected error occurred", req.getRequestURI()));
+    }
+}
