@@ -1,10 +1,19 @@
 package com.paymentledger.entity;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.UuidGenerator;
-
 import java.time.Instant;
 import java.util.UUID;
+
+import org.hibernate.annotations.UuidGenerator;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 
 /**
  * In-app notification for a user.
@@ -55,6 +64,14 @@ public class Notification {
         this.user = user;
         this.type = type;
         this.message = message;
+        this.read = false;
+    }
+
+    public Notification(User user, String type, String message, boolean read) {
+        this.user = user;
+        this.type = type;
+        this.message = message;
+        this.read = read;
     }
 
     // ── Getters and setters ────────────────────────────────────────────────

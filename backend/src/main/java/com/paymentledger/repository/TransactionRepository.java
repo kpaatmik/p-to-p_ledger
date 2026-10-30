@@ -1,7 +1,12 @@
 package com.paymentledger.repository;
 
-import com.paymentledger.entity.Transaction;
-import com.paymentledger.entity.TransactionStatus;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,12 +14,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import com.paymentledger.entity.Transaction;
+import com.paymentledger.entity.TransactionStatus;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
@@ -93,7 +94,36 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     // ── Reconciliation ─────────────────────────────────────────────────────
 
-    @Query("SELECT COUNT(t) FROM Transaction t WHERE t.status = :status " +
+    @Query("SELECT COALESCE(COUNT(t), 0) FROM Transaction t WHERE t.status = :status " +
            "AND t.settlementDueDate <= :today")
     long countOverdue(@Param("status") TransactionStatus status, @Param("today") LocalDate today);
+
+    // ── T-053: Transaction history with filters ──────────────────────────
+
+    @Query("SELECT t FROM Transaction t WHERE (t.sender.id = :userId OR t.receiver.id = :userId) " +
+           "AND t.status = :status AND t.createdAt BETWEEN :from AND :to " +
+           "ORDER BY t.createdAt DESC")
+    Page<Transaction> findByUserIdStatusAndDateRange(@Param("userId") UUID userId,
+                                                      @Param("status") TransactionStatus status,
+                                                      @Param("from") Instant from,
+                                                      @Param("to") Instant to,
+                                                      Pageable pageable);
+
+    @Query("SELECT t FROM Transaction t WHERE t.sender.id = :userId " +
+           "AND t.status = :status AND t.createdAt BETWEEN :from AND :to " +
+           "ORDER BY t.createdAt DESC")
+    Page<Transaction> findSentByStatusAndDateRange(@Param("userId") UUID userId,
+                                                    @Param("status") TransactionStatus status,
+                                                    @Param("from") Instant from,
+                                                    @Param("to") Instant to,
+                                                    Pageable pageable);
+
+    @Query("SELECT t FROM Transaction t WHERE t.receiver.id = :userId " +
+           "AND t.status = :status AND t.createdAt BETWEEN :from AND :to " +
+           "ORDER BY t.createdAt DESC")
+    Page<Transaction> findReceivedByStatusAndDateRange(@Param("userId") UUID userId,
+                                                        @Param("status") TransactionStatus status,
+                                                        @Param("from") Instant from,
+                                                        @Param("to") Instant to,
+                                                        Pageable pageable);
 }

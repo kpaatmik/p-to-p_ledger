@@ -108,4 +108,26 @@ public class GlobalExceptionHandler {
                         "Account is temporarily locked")));
         return ResponseEntity.status(423).body(body);
     }
+
+    // ── Phase 4 wallet exceptions ──────────────────────────────────────────
+
+    /** HTTP 422 Unprocessable Entity — wallet operation error (not found, invalid status). */
+    @ExceptionHandler(WalletOperationException.class)
+    public ResponseEntity<ErrorResponse> handleWalletOperation(
+            WalletOperationException ex, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(
+                new ErrorResponse(422, "Wallet Operation Failed", ex.getMessage(), req.getRequestURI()));
+    }
+
+    /** HTTP 402 Payment Required — insufficient wallet balance for debit. */
+    @ExceptionHandler(InsufficientBalanceException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientBalance(
+            InsufficientBalanceException ex, HttpServletRequest req) {
+        ErrorResponse body = new ErrorResponse(
+                402, "Insufficient Balance", ex.getMessage(), req.getRequestURI());
+        body.setFieldErrors(List.of(
+                new ErrorResponse.FieldError("available", ex.getAvailableBalance().toString(), "Available balance"),
+                new ErrorResponse.FieldError("requested", ex.getRequestedAmount().toString(), "Requested amount")));
+        return ResponseEntity.status(402).body(body);
+    }
 }
