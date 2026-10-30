@@ -60,7 +60,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     // ── Settlement job queries ─────────────────────────────────────────────
 
-    /** All PENDING transfers whose settlement date is today or earlier. */
+    /** All PENDING transfers whose settlement date is today or earlier (paginated). */
+    Page<Transaction> findByStatusAndSettlementDueDateLessThanEqual(
+            TransactionStatus status, LocalDate dueDate, Pageable pageable);
+
+    /** Legacy non-paginated version for backward compatibility. */
     List<Transaction> findByStatusAndSettlementDueDateLessThanEqual(
             TransactionStatus status, LocalDate dueDate);
 
@@ -126,4 +130,53 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
                                                         @Param("from") Instant from,
                                                         @Param("to") Instant to,
                                                         Pageable pageable);
+
+    // ── Daily summary metrics (T-096) ──────────────────────────────────────
+
+    /**
+     * Count of PENDING or SUCCESS P2P transfers created on the given date (IST).
+     * Used for daily initiated transaction metric.
+     */
+    @Query("SELECT COALESCE(COUNT(t), 0) FROM Transaction t " +
+           "WHERE t.type = com.paymentledger.entity.TransactionType.P2P_TRANSFER " +
+           "AND t.status IN (com.paymentledger.entity.TransactionStatus.PENDING, " +
+           "com.paymentledger.entity.TransactionStatus.SUCCESS) " +
+           "AND CAST(t.createdAt AS date) = :date")
+    long countInitiatedToday(@Param("date") LocalDate date);
+
+    /**
+     * Sum of amounts for PENDING or SUCCESS P2P transfers created on the given date.
+     */
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
+           "WHERE t.type = com.paymentledger.entity.TransactionType.P2P_TRANSFER " +
+           "AND t.status IN (com.paymentledger.entity.TransactionStatus.PENDING, " +
+           "com.paymentledger.entity.TransactionStatus.SUCCESS) " +
+           "AND CAST(t.createdAt AS date) = :date")
+    BigDecimal sumInitiatedAmountToday(@Param("date") LocalDate date);
+
+    /**
+     * Count of SUCCESS P2P transfers settled on the given date.
+     */
+    @Query("SELECT COALESCE(COUNT(t), 0) FROM Transaction t " +
+           "WHERE t.type = com.paymentledger.entity.TransactionType.P2P_TRANSFER " +
+           "AND t.status = com.paymentledger.entity.TransactionStatus.SUCCESS " +
+           "AND CAST(t.settledAt AS date) = :date")
+    long countSettledToday(@Param("date") LocalDate date);
+
+    /**
+     * Sum of amounts for SUCCESS P2P transfers settled on the given date.
+     */
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
+           "WHERE t.type = com.paymentledger.entity.TransactionType.P2P_TRANSFER " +
+           "AND t.status = com.paymentledger.entity.TransactionStatus.SUCCESS " +
+           "AND CAST(t.settledAt AS date) = :date")
+    BigDecimal sumSettledAmountToday(@Param("date") LocalDate date);
+
+    /**
+     * Sum of amounts for all PENDING P2P transfers (awaiting settlement).
+     */
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
+           "WHERE t.type = com.paymentledger.entity.TransactionType.P2P_TRANSFER " +
+           "AND t.status = com.paymentledger.entity.TransactionStatus.PENDING")
+    BigDecimal sumPendingSettlementAmount();
 }

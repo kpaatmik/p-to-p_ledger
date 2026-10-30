@@ -1,8 +1,10 @@
 package com.paymentledger.repository;
 
-import com.paymentledger.entity.CheckPleaseReservation;
-import com.paymentledger.entity.ReservationStatus;
-import jakarta.persistence.LockModeType;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,10 +13,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import com.paymentledger.entity.CheckPleaseReservation;
+import com.paymentledger.entity.ReservationStatus;
+
+import jakarta.persistence.LockModeType;
 
 @Repository
 public interface CheckPleaseReservationRepository extends JpaRepository<CheckPleaseReservation, UUID> {
@@ -27,7 +29,16 @@ public interface CheckPleaseReservationRepository extends JpaRepository<CheckPle
             UUID userId, ReservationStatus status);
 
     /**
-     * All ACTIVE reservations whose expiry has passed.
+     * All ACTIVE reservations whose expiry has passed (paginated).
+     * Used by the reservation expiry processor job.
+     */
+    @Query("SELECT r FROM CheckPleaseReservation r " +
+           "WHERE r.status = com.paymentledger.entity.ReservationStatus.ACTIVE " +
+           "AND r.expiresAt <= :now")
+    Page<CheckPleaseReservation> findExpiredActive(@Param("now") Instant now, Pageable pageable);
+
+    /**
+     * All ACTIVE reservations whose expiry has passed (non-paginated, legacy).
      * Used by the reservation expiry processor job.
      */
     @Query("SELECT r FROM CheckPleaseReservation r " +
