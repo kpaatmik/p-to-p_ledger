@@ -282,6 +282,20 @@ public class WalletService {
     }
 
     /**
+     * Gets a wallet with pessimistic lock by user ID.
+     * Used in transfer flows where we have the user ID (not the wallet ID).
+     *
+     * @param userId the user's ID
+     * @return the wallet with lock acquired
+     * @throws WalletOperationException if wallet not found
+     */
+    @Transactional
+    public Wallet getWalletWithLockByUserId(UUID userId) {
+        return walletRepository.findByUserIdWithLock(userId)
+                .orElseThrow(() -> new WalletOperationException("Wallet not found"));
+    }
+
+    /**
      * Gets a wallet by ID without lock (read-only use).
      * Used for non-modifying operations.
      *
@@ -292,6 +306,20 @@ public class WalletService {
     @Transactional(readOnly = true)
     public Wallet getWallet(UUID walletId) {
         return walletRepository.findById(walletId)
+                .orElseThrow(() -> new WalletOperationException("Wallet not found"));
+    }
+
+    /**
+     * Gets a wallet by user ID without lock (read-only use).
+     * Used in transfer flows where we have the user ID (not the wallet ID).
+     *
+     * @param userId the user's ID
+     * @return the wallet
+     * @throws WalletOperationException if wallet not found
+     */
+    @Transactional(readOnly = true)
+    public Wallet getWalletByUserId(UUID userId) {
+        return walletRepository.findByUserId(userId)
                 .orElseThrow(() -> new WalletOperationException("Wallet not found"));
     }
 

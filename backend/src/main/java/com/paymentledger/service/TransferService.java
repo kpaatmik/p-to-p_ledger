@@ -129,8 +129,8 @@ public class TransferService {
         }
 
         // Get sender and recipient wallets (with lock on sender)
-        Wallet senderWallet = walletService.getWalletWithLock(sender.getId());
-        Wallet recipientWallet = walletService.getWallet(recipient.getId());
+        Wallet senderWallet = walletService.getWalletWithLockByUserId(sender.getId());
+        Wallet recipientWallet = walletService.getWalletByUserId(recipient.getId());
 
         // Validation: sender wallet ACTIVE
         if (senderWallet.getStatus() != WalletStatus.ACTIVE) {
