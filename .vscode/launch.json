@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-PaymentLedgerApplication<payment-ledger>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.paymentledger.PaymentLedgerApplication",
+            "projectName": "payment-ledger",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

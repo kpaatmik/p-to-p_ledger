@@ -1,8 +1,7 @@
 package com.paymentledger.exception;
 
-import com.paymentledger.dto.response.ErrorResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolationException;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -11,7 +10,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.List;
+import com.paymentledger.dto.response.ErrorResponse;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 
 /**
  * Centralised exception handler. Translates exceptions to consistent
@@ -76,5 +78,34 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 new ErrorResponse(500, "Internal Server Error",
                         "An unexpected error occurred", req.getRequestURI()));
+    }
+
+    // ── Phase 3 auth exceptions ────────────────────────────────────────────
+
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateEmail(
+            DuplicateEmailException ex, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                new ErrorResponse(409, "Conflict", ex.getMessage(), req.getRequestURI()));
+    }
+
+    @ExceptionHandler(DuplicatePhoneException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicatePhone(
+            DuplicatePhoneException ex, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                new ErrorResponse(409, "Conflict", ex.getMessage(), req.getRequestURI()));
+    }
+
+    /** HTTP 423 Locked — account is temporarily locked after failed login attempts. */
+    @ExceptionHandler(AccountLockedException.class)
+    public ResponseEntity<ErrorResponse> handleAccountLocked(
+            AccountLockedException ex, HttpServletRequest req) {
+        ErrorResponse body = new ErrorResponse(
+                423, "Account Locked", ex.getMessage(), req.getRequestURI());
+        // Include lock expiry as extra data via a small wrapper
+        body.setFieldErrors(List.of(
+                new ErrorResponse.FieldError("lockedUntil", ex.getLockedUntil().toString(),
+                        "Account is temporarily locked")));
+        return ResponseEntity.status(423).body(body);
     }
 }
