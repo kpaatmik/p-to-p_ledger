@@ -14,6 +14,7 @@ public record AdminUserResponse(
     String email,
     String phone,
     String role,
+    UUID walletId,
     BigDecimal totalBalance,
     BigDecimal reservedBalance,
     BigDecimal availableBalance,

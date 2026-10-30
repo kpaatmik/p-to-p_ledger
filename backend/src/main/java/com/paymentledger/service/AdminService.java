@@ -160,6 +160,7 @@ public class AdminService {
                 user.getEmail(),
                 user.getPhone(),
                 user.getRole().toString(),
+                wallet != null ? wallet.getId() : null,
                 totalBalance,
                 reservedBalance,
                 availableBalance,

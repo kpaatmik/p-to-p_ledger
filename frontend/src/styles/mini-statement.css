@@ -1,0 +1,100 @@
+.mini-statement {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.mini-statement.loading,
+.mini-statement.error {
+  text-align: center;
+  color: #6b7280;
+  padding: 2rem;
+}
+
+.mini-statement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.mini-statement-header h3 {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 1.1rem;
+}
+
+.view-all {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.view-all:hover {
+  text-decoration: underline;
+}
+
+.transaction-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transaction-table tbody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.transaction-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 1rem;
+  padding: 0.75rem;
+  background-color: #f9fafb;
+  border-radius: 4px;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.transaction-row:hover {
+  background-color: #f3f4f6;
+}
+
+.transaction-row a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.transaction-row strong {
+  color: #1a1a1a;
+  display: block;
+  font-weight: 600;
+}
+
+.transaction-row small {
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.amount {
+  text-align: right;
+  font-weight: 600;
+}
+
+.amount.sent {
+  color: #ef4444;
+}
+
+.amount.received {
+  color: #10b981;
+}
+
+.empty-state {
+  text-align: center;
+  color: #9ca3af;
+  padding: 2rem;
+  margin: 0;
+}

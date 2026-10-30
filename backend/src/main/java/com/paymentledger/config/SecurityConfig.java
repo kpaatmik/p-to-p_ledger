@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.paymentledger.security.JwtAuthFilter;
 
@@ -68,10 +69,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http)
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            CorsConfigurationSource corsConfigurationSource)
             throws Exception {
 
         http
+            // Enable CORS
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
+
             // Stateless REST API
             .csrf(csrf -> csrf.disable())
 

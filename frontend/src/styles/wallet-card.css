@@ -1,0 +1,108 @@
+.wallet-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  border: 2px solid #e5e7eb;
+}
+
+.wallet-card.active {
+  border-color: #10b981;
+}
+
+.wallet-card.frozen {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.wallet-card.inactive {
+  border-color: #f59e0b;
+  background-color: #fffbf0;
+}
+
+.wallet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.wallet-header h2 {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 1.25rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.frozen {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.inactive {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.pending {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.failed {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.wallet-balances {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.balance-item {
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 6px;
+}
+
+.balance-item label {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.balance-item .balance-amount {
+  margin: 0.5rem 0 0 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.balance-item .balance-amount.available {
+  color: #10b981;
+}
+
+.wallet-footer {
+  color: #6b7280;
+  font-size: 0.875rem;
+  text-align: right;
+}

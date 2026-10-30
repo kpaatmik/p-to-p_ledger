@@ -1,0 +1,146 @@
+.detail-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.detail-page h1 {
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+}
+
+.detail-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.detail-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.detail-section {
+  padding: 2rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-section:last-of-type {
+  border-bottom: none;
+}
+
+.detail-section h2 {
+  margin: 0 0 1.5rem 0;
+  color: #1a1a1a;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 0.5rem;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-item label {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.detail-item p {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.detail-item .mono {
+  font-family: "Courier New", monospace;
+  font-size: 0.875rem;
+  word-break: break-all;
+  background-color: #f3f4f6;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.info-box {
+  background-color: #f0f4ff;
+  border-left: 4px solid #667eea;
+  padding: 1.5rem;
+  margin: 2rem;
+  border-radius: 4px;
+}
+
+.info-box strong {
+  color: #1e40af;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.info-box p {
+  color: #1e40af;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.status-badge.pending {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.failed {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.loading-state {
+  text-align: center;
+  color: #6b7280;
+  padding: 2rem;
+  font-size: 1.1rem;
+}
+
+.alert-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
