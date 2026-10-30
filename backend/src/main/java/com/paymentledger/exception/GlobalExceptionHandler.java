@@ -109,6 +109,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(423).body(body);
     }
 
+    // ── Phase 7 Check Please exceptions ────────────────────────────────────
+
+    /** HTTP 401 Unauthorized — incorrect transaction PIN for merchant payments. */
+    @ExceptionHandler(InvalidPinException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPin(
+            InvalidPinException ex, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                new ErrorResponse(401, "Unauthorized", ex.getMessage(), req.getRequestURI()));
+    }
+
     // ── Phase 4 wallet exceptions ──────────────────────────────────────────
 
     /** HTTP 422 Unprocessable Entity — wallet operation error (not found, invalid status). */

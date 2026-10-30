@@ -1,16 +1,17 @@
 package com.paymentledger.service;
 
-import com.paymentledger.dto.response.UserSearchResponse;
-import com.paymentledger.entity.User;
-import com.paymentledger.exception.WalletOperationException;
-import com.paymentledger.repository.UserRepository;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-import java.util.UUID;
+import com.paymentledger.dto.response.UserSearchResponse;
+import com.paymentledger.entity.User;
+import com.paymentledger.exception.WalletOperationException;
+import com.paymentledger.repository.UserRepository;
 
 /**
  * User service for T-050 (recipient search) and helper methods.
@@ -81,7 +82,7 @@ public class UserService {
     /**
      * Helper: Gets the authenticated user by ID.
      */
-    protected User getAuthenticatedUser() {
+    public User getAuthenticatedUser() {
         UUID userId = getAuthenticatedUserId();
         return userRepository.findById(userId)
                 .orElseThrow(() -> new WalletOperationException("Authenticated user not found"));

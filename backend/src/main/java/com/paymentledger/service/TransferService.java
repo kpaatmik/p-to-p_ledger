@@ -28,6 +28,7 @@ import com.paymentledger.util.BusinessDayCalculator;
 /**
  * Transfer service for P2P money transfers (Phase 5, T-051 to T-055).
  * Coordinates wallet operations, transaction creation, ledger entries, and notifications.
+ * Integrates fraud detection (Phase 6, T-060 to T-062).
  * All financial operations are atomic and transactional.
  */
 @Service
@@ -41,6 +42,7 @@ public class TransferService {
     private final UserService userService;
     private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
+    private final FraudService fraudService;
 
     public TransferService(UserRepository userRepository,
                            TransactionRepository transactionRepository,
@@ -49,7 +51,8 @@ public class TransferService {
                            WalletService walletService,
                            UserService userService,
                            NotificationService notificationService,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder,
+                           FraudService fraudService) {
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
         this.ledgerEntryRepository = ledgerEntryRepository;
@@ -58,10 +61,12 @@ public class TransferService {
         this.userService = userService;
         this.notificationService = notificationService;
         this.passwordEncoder = passwordEncoder;
+        this.fraudService = fraudService;
     }
 
     /**
      * T-051 + T-052: Initiates a P2P transfer atomically.
+     * Integrates fraud detection (T-060, T-061, T-062).
      * 
      * Validations:
      * - Sender != Recipient
@@ -69,7 +74,9 @@ public class TransferService {
      * - PIN correct (BCrypt verification)
      * - Sender wallet ACTIVE
      * - Sufficient available balance
-     * - No fraudulent patterns (if Phase 6 implemented)
+     * - T-060: Daily limit not exceeded (BLOCKS if exceeded)
+     * - T-061: No duplicate within 2 minutes (BLOCKS if found)
+     * - T-062: High-value threshold (creates alert, does NOT block)
      * 
      * Idempotency (T-052):
      * - Check request_id before processing
@@ -77,15 +84,18 @@ public class TransferService {
      * - DB UNIQUE constraint prevents race conditions
      * 
      * Atomic operations:
-     * - Lock sender wallet
-     * - Debit sender
+     * - Lock sender wallet (pessimistic)
+     * - T-060: Check daily limit (throws if exceeded + creates rejection alert)
+     * - T-061: Check duplicate (throws if found + creates rejection alert)
+     * - Debit sender wallet
      * - Create Transaction record (PENDING)
      * - Create sender DEBIT ledger entry
-     * - Create notification
+     * - T-062: Create high-value alert if threshold exceeded (same transaction)
+     * - Send notification
      * 
      * @param request contains recipientId, amount, transactionPin, requestId
      * @return transfer response with transaction details
-     * @throws WalletOperationException for validation failures
+     * @throws WalletOperationException for validation failures or fraud rejections
      */
     @Transactional
     public TransferResponse initiateTransfer(TransferRequest request) {
@@ -132,11 +142,21 @@ public class TransferService {
             throw new WalletOperationException("Recipient wallet is not active");
         }
 
-        // Validation: sufficient available balance (walletService.debitWallet will check again atomically)
+        // Validation: sufficient available balance
         BigDecimal available = senderWallet.getTotalBalance().subtract(senderWallet.getReservedBalance());
         if (available.compareTo(request.amount()) < 0) {
             throw new WalletOperationException("Insufficient available balance");
         }
+
+        // ── Phase 6 Fraud Detection (T-060, T-061) ────────────────────────
+        // Sender wallet is locked; perform fraud checks BEFORE debit
+        // Both checks throw exceptions if they fail (reject the transfer)
+        
+        // T-060: Daily limit check (BLOCKS if exceeded, creates rejection alert)
+        fraudService.checkDailyLimitExceeded(sender.getId(), sender, recipient, request.amount());
+        
+        // T-061: Duplicate detection (BLOCKS if found, creates rejection alert)
+        fraudService.checkDuplicate(sender.getId(), recipient.getId(), request.amount(), sender, recipient);
 
         // Calculate settlement date: T+3 business days
         LocalDate settlementDate = BusinessDayCalculator.getSettlementDateUtc();
@@ -165,6 +185,11 @@ public class TransferService {
                 request.amount(),
                 "P2P transfer to " + recipient.getEmail()
         ));
+
+        // ── Phase 6 Fraud Detection (T-062) ────────────────────────────────
+        // T-062: High-value alert (NON-BLOCKING)
+        // Created in SAME transaction as the approved PENDING transaction
+        fraudService.createHighValueAlert(transaction);
 
         // Create transfer initiation notification for sender
         notificationService.send(
